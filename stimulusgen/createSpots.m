@@ -77,6 +77,16 @@ function gaborSpots = createSpots(outputdir)
     gaborSpots.gaborStack = gaborStack;
     gaborSpots.generatingFile = 'createSpots.m';
     gaborSpots.dateSaved = datestr(now);
+    
+    gaborSpots.totalfov = totalfov;
+    gaborSpots.cpd = cpd;
+    gaborSpots.pxPerDeg = pxPerDeg;
+    gaborSpots.degPerPx = degPerPx;
+    gaborSpots.cpim = cpim;
+    gaborSpots.dotSizeDeg = dotSizeDeg;
+    gaborSpots.dotSizePx = dotSizePx;
+    gaborSpots.dotPosDeg = dotPosDeg;
+    gaborSpots.dotPosPx = dotPosPx;
 
     outputFile = 'gaborSpots.mat';
     save(fullfile(outputdir, outputFile), 'gaborSpots');
