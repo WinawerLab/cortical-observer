@@ -7,6 +7,11 @@ function sigmaP = stdObs_convertS2P(sigmaS, n)
 
     assert(any(size(sigmaS)==1))
     assert(any(size(n)==1))
+    
+    if length(n) == 1
+        n = n * ones(size(sigmaS));
+    end    
+    
     assert(length(sigmaS) == length(n))
 
     sigmaP = 0.161*(sigmaS.*sqrt(n)).^(-1)  + 0.249*sigmaS.^(-0.5) - 0.059;
