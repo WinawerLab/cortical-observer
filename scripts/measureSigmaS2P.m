@@ -36,10 +36,10 @@ C = 0.93; % haven't yet tested with different C values
 sigmaSVals = [2, 4, 6, 8, 10, 12, 14]; % in pixels
 nVals = linspace(0.1,2,20);
 
-%% Compute or load sigma P fit to the sigma S
+%% Compute or load sigma P
 
 sigmaPFitName = fullfile(cortical_obs_rootpath, 'stimulusgen', 'sigmaFitResults.mat');
-if false %exist(sigmaPFitName, 'file')
+if exist(sigmaPFitName, 'file')
     load(sigmaPFitName, 'sigmaPFit')
 else
     sigmaPFit = struct();
@@ -81,6 +81,11 @@ else
     save(sigmaPFitName, 'sigmaPFit')
 end
 
+%% WORK IN PROGRESS - take care of units correctly
+numpix = size(gaborSpots.gaborStack,1);
+fov    = gaborSpots.totalfov;
+pix2deg = fov/numpix;
+
 %% Fit sigma_s/sqrt(n) model for each sigma_s separately at a wide spread of n's
 aFit = zeros(size(sigmaSVals));
 bFit = zeros(size(sigmaSVals));
@@ -90,9 +95,10 @@ for ss = 1:length(sigmaSVals)
     aFit(ss) = nsFit.p1;
     bFit(ss) = nsFit.p2;
     
-    %figure; hold on;
-    %plot(sigmaSVals(sigma_s)*sqrt(nVals).^(-1)',sigmaPFit.sigmaPFit(sigma_s, :)', 'o-')
+    figure; hold on;
+    plot(sigmaSVals(ss)*pix2deg*sqrt(nVals).^(-1)',sigmaPFit.sigmaPFit(ss, :)', 'o-')
     %plot(nsFit);
+    xlabel('Sigma_s divided by sqrt(n)'), ylabel('Sigma_p, measured')
 end
 
 %% The slope is constant, but the intercept varies smoothly with n, so zoom in on it
@@ -130,9 +136,10 @@ title('Relationship between n and sigma\_p for varying sigma\_s');
 
 %% Plot the other slices
 figure; hold all;
+
 for nn = 1:length(nVals)
-    plot(sigmaSVals, sigmaPFit.sigmaPFit(:, nn), 'o-')
-    plot(sigmaSVals, stdObs_convertS2P(sigmaSVals, nVals(nn)), 'o-')
+    plot(sigmaSVals*pix2deg, sigmaPFit.sigmaPFit(:, nn), 'o-')
+    %plot(sigmaSVals, stdObs_convertS2P(sigmaSVals, nVals(nn)), 'o-')
 end
 xlabel('parameter for pRF size (sigma\_s)');
 ylabel('measured pRF size (sigma\_p)');
