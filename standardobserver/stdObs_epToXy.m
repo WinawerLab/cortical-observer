@@ -1,4 +1,4 @@
-function xy = stdObs_epToXy(ep, imSz, pxPerDeg)
+function xy = stdObs_epToXy(ep, imSzPx, pxPerDeg)
 % STANDARD CORTICAL OBSERVER: [(eccentricity, polar angle), imSz, pxPerDeg] -> SOC parameters
 %
 % Convert eccentricity and polar angle (both in degrees) to x,y position in
@@ -19,7 +19,7 @@ function xy = stdObs_epToXy(ep, imSz, pxPerDeg)
     angleRad = deg2rad(ep(:,2));
     xyCentered = [eccPx.*sin(angleRad) eccPx.*cos(angleRad)];
     
-    mid = [(imSz+1)/2, (imSz+1)/2]; % TODO verify that this is right
+    mid = [(imSzPx+1)/2, (imSzPx+1)/2]; % TODO verify that this is right
     xy = xyCentered + repmat(mid, size(xyCentered,1), 1);
 end
 

@@ -13,23 +13,11 @@ discardAreas = or(epaRaw(:,3) == 1.5, epaRaw(:,3) == 2.5);
 discardEcc = epaRaw(:,1) > 20;
 discardVoxels = or(discardAreas, discardEcc);
 epa = epaRaw(~discardVoxels, :);
-
-%% Compute parameters
-
-% Obtain SOC parameters for voxels
-params = stdObs_epaToParams(epa);
-    % In: voxs x 3 (ecc, polar angle, area)
-    % Out: voxs x 3 (sigma_s, n, c)
-  
-% (Sanity check: do pRF sizes get larger with area?)
-% mean(params(epa(:,3) == 1, 1)) - 5.57
-% mean(params(epa(:,3) == 2, 1)) - 5.31
-% mean(params(epa(:,3) == 3, 1)) - 7.71
     
-%% Sanity check hemifield (demo)
+%% Sanity check hemifield (example/dummy)
 % Convert eccentricity and polar angle (in degrees) to x,y (in pixels)
 imSzPxDemo = 300; % images assumed to be square
-pxPerDegDemo = 10; % TODO get real values
+pxPerDegDemo = 10; % these are just dummy values
 xyDemo = stdObs_epToXy(epa(:,1:2), imSzPxDemo, pxPerDegDemo);
     % In: voxs x 2 (ecc, polar angle), 1x2 (size), 1
     % Out: voxs x 2 (x, y)
@@ -43,7 +31,7 @@ axis ij; xlim([0, imSzPxDemo]); ylim([0, imSzPxDemo]);
 %%%%%%%%%% PART 2 - predictions %%%%%%%%%%
 %
 
-%% Prepare data and parameters
+%% Prepare data
 data = load_subj001_2015_10_22();
 imStack = data.stimuli.imStack(:,:,:,1);
 imStack = (double(imStack)- 127)/255;
@@ -58,21 +46,28 @@ cpIm = cpd * totalFovDeg;
 imSzPx = sqrt(size(imFlat,1));
 pxPerDeg = imSzPx / totalFovDeg;
 
-xy = stdObs_epToXy(epa(:,1:2), imSzPx, pxPerDeg);
-xyParams = [xy, params];
+%% Prepare parameters
+params = stdObs_epaToParams(epa, imSzPx, pxPerDeg);
+    % In: voxs x 3 (ecc, polar angle, area)
+    % Out: voxs x 3 (x, y, sigma_s, n, c)
+  
+% (Sanity check: do pRF sizes get larger with area?)
+% mean(params(epa(:,3) == 1, 3)) - 24.38 (pixels)
+% mean(params(epa(:,3) == 2, 3)) - 26.26 
+% mean(params(epa(:,3) == 3, 3)) - 31.29
 
 %% Make predictions
 if exist('gaborOutput', 'var')
-    preds = stdObs_predict(xyParams, imFlat, cpIm, gaborOutput);
+    preds = stdObs_predict(params, imFlat, cpIm, gaborOutput);
 else
-    [preds, gaborOutput] = stdObs_predict(xyParams, imFlat, cpIm);
+    [preds, gaborOutput] = stdObs_predict(params, imFlat, cpIm);
 end
     % In: voxs x 5 (x, y, sigma_s, n, c), px x nIms, 1
     % Out: voxs x nIms 
     
-%% Plot *all* predictions versus data
+%% Plot predictions versus data
 rois = {'RV1', 'RV2', 'RV3'};
-for area = 1:3 % just V1 for now
+for area = 1:3
     roiIdx = strInCellArray(rois{area}, data.roiNames);
     roiData = data.roiBetamn{roiIdx};
     

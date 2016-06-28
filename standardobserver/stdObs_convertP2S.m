@@ -5,17 +5,18 @@ function sigmaS = stdObs_convertP2S(sigmaP, n)
 % Convert the pRF model's pRF size parameter to the equivalent SOC model's
 % pRF size parameter
 %
-% Can handle a list of sigmaP, but currently only one n value at a time
-    assert(length(n)==1)
+% Can handle a list of sigmaP and n's that correspond
     assert(any(size(sigmaP)==1))
+    assert(any(size(n)==1))
+    assert(length(sigmaP) == length(n))
     
     % Arithmetic:
     % sigmaP = 0.161*sigmaS*sqrt(n).^(-1)  + 0.249*sigmaS.^(-0.5) - 0.059;
     % 0 = 0.161*sigmaS*sqrt(n).^(-1)  + 0.249*sigmaS.^(-0.5) - 0.059 - sigmaP;
     
-    sigmaS = zeros(1, length(sigmaP));
+    sigmaS = zeros(size(sigmaP));
     for ii = 1:length(sigmaP)
-        a = 0.161*sqrt(n).^(-1);
+        a = 0.161*sqrt(n(ii)).^(-1);
         b = 0.249;
         c = -0.059 - sigmaP(ii);
 
